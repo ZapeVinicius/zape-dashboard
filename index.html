@@ -760,7 +760,7 @@ function renderCharts() {
 
     const lastFat = fatVals[fatVals.length-1] || 0;
     const firstFat = fatVals.find(v => v > 0) || 0;
-    const varFat = firstFat > 0 ? (lastFat - firstFat) / firstFat : 0;
+    const varFat = firstFat > 0 ? (lastFat / firstFat) ;
 
     const card = document.createElement('div');
     card.className = 'chart-card';
