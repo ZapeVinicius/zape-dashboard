@@ -762,40 +762,6 @@ function renderCharts() {
     const firstFat = fatVals.find(v => v > 0) || 0;
     const varFat = firstFat > 0 ? (lastFat - firstFat) / firstFat : 0;
 
-    const card = document.createElement('div');
-    card.className = 'chart-card';
-    card.innerHTML = `
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-card-title">${prod.nome.substring(0,70)}</div>
-          <div class="chart-card-id">ID: ${pid}</div>
-        </div>
-        <div class="chart-badges">
-          <span class="badge ${varFat>=0?'badge-green':'badge-red'}">${varFat>=0?'▲':'▼'} ${Math.abs(varFat*100).toFixed(1)}%</span>
-        </div>
-      </div>
-      <div class="chart-card-body">
-        <div class="chart-metrics">
-          <div class="metric-mini">
-            <div class="metric-mini-lbl">Faturamento</div>
-            <div class="metric-mini-val">R$${lastFat.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
-            <div class="metric-mini-var ${varFat>=0?'var-pos':'var-neg'}">${varFat>=0?'+':''}${(varFat*100).toFixed(1)}% vs primeiro dia</div>
-          </div>
-          <div class="metric-mini">
-            <div class="metric-mini-lbl">Impressões</div>
-            <div class="metric-mini-val">${(impVals[impVals.length-1]||0).toLocaleString('pt-BR')}</div>
-            <div class="metric-mini-var" style="color:var(--text3)">último dia</div>
-          </div>
-          <div class="metric-mini">
-            <div class="metric-mini-lbl">Cliques</div>
-            <div class="metric-mini-val">${(clkVals[clkVals.length-1]||0).toLocaleString('pt-BR')}</div>
-            <div class="metric-mini-var" style="color:var(--text3)">último dia</div>
-          </div>
-        </div>
-        <div class="chart-canvas-wrap"><canvas id="chart-${pid.replace(/[^a-z0-9]/gi,'_')}"></canvas></div>
-      </div>`;
-    grid.appendChild(card);
-
     const ctx = document.getElementById('chart-' + pid.replace(/[^a-z0-9]/gi,'_')).getContext('2d');
     chartInstances[pid] = new Chart(ctx, {
       type: 'line',
