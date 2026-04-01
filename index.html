@@ -868,13 +868,13 @@ function renderCharts() {
         scales: {
           x: {
             grid:{ color: 'rgba(255,255,255,0.04)' },
-            ticks:{ font:{family:'Poppins',size:10}, color:'#525252', maxTicksLimit:15 }
+            ticks:{ font:{family:'Poppins',size:10}, color:'#FFFFFF', maxTicksLimit:15 }
           },
           y: {
             position:'left',
             grid:{ color: 'rgba(255,255,255,0.04)' },
             ticks:{
-              font:{family:'Poppins',size:10}, color:'#9AEE00',
+              font:{family:'Poppins',size:10}, color:'#FFFFFF',
               callback: v => 'R$'+(v>=1000?(v/1000).toFixed(0)+'k':v.toLocaleString('pt-BR'))
             }
           },
@@ -882,7 +882,7 @@ function renderCharts() {
             position:'right',
             grid:{ display:false },
             ticks:{
-              font:{family:'Poppins',size:10}, color:'#525252',
+              font:{family:'Poppins',size:10}, color:'#FFFFFF',
               callback: v => v>=1000?(v/1000).toFixed(0)+'k':v
             }
           }
