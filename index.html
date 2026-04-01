@@ -758,9 +758,20 @@ function renderCharts() {
     const impVals = datas.map(d => parseInt(prod.por_data[d]?.impressoes||0));
     const clkVals = datas.map(d => parseInt(prod.por_data[d]?.cliques||0));
 
-    const lastFat = fatVals[fatVals.length-1] || 0;
-    const firstFat = fatVals.find(v => v > 0) || 0;
-    const varFat = firstFat > 0 ? (lastFat / firstFat) ;
+const lastFat = fatVals[fatVals.length - 1] || 0;
+
+// filtra apenas valores válidos (>0) se quiser ignorar dias zerados
+const validFat = fatVals.filter(v => v > 0);
+
+// média (evita divisão por 0)
+const avgFat = validFat.length > 0 
+  ? validFat.reduce((acc, v) => acc + v, 0) / validFat.length 
+  : 0;
+
+// variação percentual vs média
+const varFat = avgFat > 0 
+  ? (lastFat - avgFat) / avgFat 
+  : 0;
 
     const card = document.createElement('div');
     card.className = 'chart-card';
