@@ -634,11 +634,11 @@ async function handleUpload(input) {
     setProgress(70, `Salvando ${produtos.length} produtos para ${dataFmt}...`);
 
     for (let i = 0; i < produtos.length; i += 50) {
-      await api('dados_diarios', {
-        method:'POST',
-        body: JSON.stringify(produtos.slice(i, i+50)),
-        prefer: 'resolution=merge-duplicates,return=minimal',
-      });
+await supabase
+  .from('dados_diarios')
+  .upsert(produtos.slice(i, i+50), {
+    onConflict: 'loja_id,data,produto_id'
+  });
     }
 
     setProgress(100, 'Concluído!');
