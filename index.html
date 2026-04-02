@@ -304,6 +304,7 @@ let chartInstances = {};
 // ── API ──────────────────────────────────────────────────────────────────────
 async function api(path, opts = {}) {
   const { prefer, headers: extraHeaders, ...fetchOpts } = opts;
+
   const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
     ...fetchOpts,
     headers: {
@@ -314,13 +315,17 @@ async function api(path, opts = {}) {
       ...(extraHeaders || {}),
     },
   });
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
+    let err = {};
+    try { err = await res.json(); } catch {}
     throw new Error(err.message || err.hint || `Erro ${res.status}`);
   }
-  return res.status === 204 ? null : res.json();
-}
 
+  // 🔥 CORREÇÃO AQUI
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
 // ── PAGES ────────────────────────────────────────────────────────────────────
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
