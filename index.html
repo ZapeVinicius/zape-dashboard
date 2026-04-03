@@ -581,9 +581,32 @@ function renderCharts() {
     const fatVals = datas.map(d => parseFloat(prod.por_data[d]?.faturamento||0));
     const impVals = datas.map(d => parseInt(prod.por_data[d]?.impressoes||0));
     const clkVals = datas.map(d => parseInt(prod.por_data[d]?.cliques||0));
+
     const lastFat = fatVals[fatVals.length-1] || 0;
+    const prevFat = fatVals[fatVals.length-2] ?? null;
+    const lastImp = impVals[impVals.length-1] || 0;
+    const prevImp = impVals[impVals.length-2] ?? null;
+    const lastClk = clkVals[clkVals.length-1] || 0;
+    const prevClk = clkVals[clkVals.length-2] ?? null;
+
+    // Variacao vs dia anterior (penultimo dia no periodo)
+    const varFat = (prevFat !== null && prevFat > 0) ? (lastFat - prevFat) / prevFat : null;
+    const varImp = (prevImp !== null && prevImp > 0) ? (lastImp - prevImp) / prevImp : null;
+    const varClk = (prevClk !== null && prevClk > 0) ? (lastClk - prevClk) / prevClk : null;
+
+    // Variacao geral (primeiro vs ultimo) para o badge do header
     const firstFat = fatVals.find(v => v > 0) || 0;
-    const varFat = firstFat > 0 ? (lastFat - firstFat) / firstFat : 0;
+    const varFatGeral = firstFat > 0 ? (lastFat - firstFat) / firstFat : 0;
+
+    function fmtVar(v) {
+      if (v === null) return { txt: 'sem dado anterior', cls: '' };
+      const sign = v >= 0 ? '+' : '';
+      const cls  = v >= 0 ? 'var-pos' : 'var-neg';
+      return { txt: `${sign}${(v*100).toFixed(1)}% vs dia anterior`, cls };
+    }
+    const fv = fmtVar(varFat);
+    const iv = fmtVar(varImp);
+    const cv = fmtVar(varClk);
 
     const card = document.createElement('div');
     card.className = 'chart-card';
@@ -594,7 +617,7 @@ function renderCharts() {
           <div class="chart-card-id">ID: ${pid}</div>
         </div>
         <div class="chart-badges">
-          <span class="badge ${varFat>=0?'badge-green':'badge-red'}">${varFat>=0?'▲':'▼'} ${Math.abs(varFat*100).toFixed(1)}%</span>
+          <span class="badge ${varFatGeral>=0?'badge-green':'badge-red'}">${varFatGeral>=0?'▲':'▼'} ${Math.abs(varFatGeral*100).toFixed(1)}%</span>
         </div>
       </div>
       <div class="chart-card-body">
@@ -602,17 +625,17 @@ function renderCharts() {
           <div class="metric-mini">
             <div class="metric-mini-lbl">Faturamento</div>
             <div class="metric-mini-val">R$${lastFat.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
-            <div class="metric-mini-var ${varFat>=0?'var-pos':'var-neg'}">${varFat>=0?'+':''}${(varFat*100).toFixed(1)}% vs primeiro dia</div>
+            <div class="metric-mini-var ${fv.cls}">${fv.txt}</div>
           </div>
           <div class="metric-mini">
             <div class="metric-mini-lbl">Impressões</div>
-            <div class="metric-mini-val">${(impVals[impVals.length-1]||0).toLocaleString('pt-BR')}</div>
-            <div class="metric-mini-var" style="color:var(--text3)">último dia</div>
+            <div class="metric-mini-val">${lastImp.toLocaleString('pt-BR')}</div>
+            <div class="metric-mini-var ${iv.cls}">${iv.txt}</div>
           </div>
           <div class="metric-mini">
             <div class="metric-mini-lbl">Cliques</div>
-            <div class="metric-mini-val">${(clkVals[clkVals.length-1]||0).toLocaleString('pt-BR')}</div>
-            <div class="metric-mini-var" style="color:var(--text3)">último dia</div>
+            <div class="metric-mini-val">${lastClk.toLocaleString('pt-BR')}</div>
+            <div class="metric-mini-var ${cv.cls}">${cv.txt}</div>
           </div>
         </div>
         <div class="chart-canvas-wrap"><canvas id="chart-${pid.replace(/[^a-z0-9]/gi,'_')}"></canvas></div>
