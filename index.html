@@ -582,31 +582,15 @@ function renderCharts() {
     const impVals = datas.map(d => parseInt(prod.por_data[d]?.impressoes||0));
     const clkVals = datas.map(d => parseInt(prod.por_data[d]?.cliques||0));
 
+    // FIX 1: totais do período filtrado
+    const totalFat = fatVals.reduce((s,v) => s+v, 0);
+    const totalImp = impVals.reduce((s,v) => s+v, 0);
+    const totalClk = clkVals.reduce((s,v) => s+v, 0);
+
+    // Badge do header: variação geral faturamento (primeiro vs último)
     const lastFat = fatVals[fatVals.length-1] || 0;
-    const prevFat = fatVals[fatVals.length-2] ?? null;
-    const lastImp = impVals[impVals.length-1] || 0;
-    const prevImp = impVals[impVals.length-2] ?? null;
-    const lastClk = clkVals[clkVals.length-1] || 0;
-    const prevClk = clkVals[clkVals.length-2] ?? null;
-
-    // Variacao vs dia anterior (penultimo dia no periodo)
-    const varFat = (prevFat !== null && prevFat > 0) ? (lastFat - prevFat) / prevFat : null;
-    const varImp = (prevImp !== null && prevImp > 0) ? (lastImp - prevImp) / prevImp : null;
-    const varClk = (prevClk !== null && prevClk > 0) ? (lastClk - prevClk) / prevClk : null;
-
-    // Variacao geral (primeiro vs ultimo) para o badge do header
     const firstFat = fatVals.find(v => v > 0) || 0;
     const varFatGeral = firstFat > 0 ? (lastFat - firstFat) / firstFat : 0;
-
-    function fmtVar(v) {
-      if (v === null) return { txt: 'sem dado anterior', cls: '' };
-      const sign = v >= 0 ? '+' : '';
-      const cls  = v >= 0 ? 'var-pos' : 'var-neg';
-      return { txt: `${sign}${(v*100).toFixed(1)}% vs dia anterior`, cls };
-    }
-    const fv = fmtVar(varFat);
-    const iv = fmtVar(varImp);
-    const cv = fmtVar(varClk);
 
     const card = document.createElement('div');
     card.className = 'chart-card';
@@ -623,19 +607,19 @@ function renderCharts() {
       <div class="chart-card-body">
         <div class="chart-metrics">
           <div class="metric-mini">
-            <div class="metric-mini-lbl">Faturamento</div>
-            <div class="metric-mini-val">R$${lastFat.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
-            <div class="metric-mini-var ${fv.cls}">${fv.txt}</div>
+            <div class="metric-mini-lbl">Faturamento Total</div>
+            <div class="metric-mini-val">R$${totalFat.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
+            <div class="metric-mini-var" style="color:var(--text3)">no período</div>
           </div>
           <div class="metric-mini">
-            <div class="metric-mini-lbl">Impressões</div>
-            <div class="metric-mini-val">${lastImp.toLocaleString('pt-BR')}</div>
-            <div class="metric-mini-var ${iv.cls}">${iv.txt}</div>
+            <div class="metric-mini-lbl">Impressões Total</div>
+            <div class="metric-mini-val">${totalImp.toLocaleString('pt-BR')}</div>
+            <div class="metric-mini-var" style="color:var(--text3)">no período</div>
           </div>
           <div class="metric-mini">
-            <div class="metric-mini-lbl">Cliques</div>
-            <div class="metric-mini-val">${lastClk.toLocaleString('pt-BR')}</div>
-            <div class="metric-mini-var ${cv.cls}">${cv.txt}</div>
+            <div class="metric-mini-lbl">Cliques Total</div>
+            <div class="metric-mini-val">${totalClk.toLocaleString('pt-BR')}</div>
+            <div class="metric-mini-var" style="color:var(--text3)">no período</div>
           </div>
         </div>
         <div class="chart-canvas-wrap"><canvas id="chart-${pid.replace(/[^a-z0-9]/gi,'_')}"></canvas></div>
@@ -648,9 +632,28 @@ function renderCharts() {
       data: {
         labels,
         datasets: [
-          { label:'Faturamento (R$)', data:fatVals, borderColor:'#9AEE00', backgroundColor:'rgba(154,238,0,0.06)', borderWidth:2, pointBackgroundColor:'#9AEE00', pointRadius:4, pointHoverRadius:6, fill:true, tension:0.3, yAxisID:'y' },
-          { label:'Impressões', data:impVals, borderColor:'#00A8FF', backgroundColor:'transparent', borderWidth:1.5, pointBackgroundColor:'#00A8FF', pointRadius:3, pointHoverRadius:5, fill:false, tension:0.3, yAxisID:'y2' },
-          { label:'Cliques', data:clkVals, borderColor:'#ff7420', backgroundColor:'transparent', borderWidth:1.5, pointBackgroundColor:'#ff7420', pointRadius:3, pointHoverRadius:5, fill:false, tension:0.3, yAxisID:'y2' }
+          {
+            label:'Faturamento (R$)', data:fatVals,
+            borderColor:'#9AEE00', backgroundColor:'rgba(154,238,0,0.06)',
+            borderWidth:2, pointBackgroundColor:'#9AEE00',
+            pointRadius:4, pointHoverRadius:6,
+            fill:true, tension:0.3, yAxisID:'y'
+          },
+          {
+            label:'Impressões', data:impVals,
+            borderColor:'#00A8FF', backgroundColor:'transparent',
+            borderWidth:1.5, pointBackgroundColor:'#00A8FF',
+            pointRadius:3, pointHoverRadius:5,
+            fill:false, tension:0.3, yAxisID:'y2'
+          },
+          {
+            // FIX 2: Cliques em eixo proprio (y3) para nao ficar "reto"
+            label:'Cliques', data:clkVals,
+            borderColor:'#ff7420', backgroundColor:'transparent',
+            borderWidth:1.5, pointBackgroundColor:'#ff7420',
+            pointRadius:3, pointHoverRadius:5,
+            fill:false, tension:0.3, yAxisID:'y3'
+          }
         ]
       },
       options: {
@@ -662,17 +665,40 @@ function renderCharts() {
             backgroundColor:'#111111', borderColor:'#2a2a2a', borderWidth:1,
             titleFont:{family:'Poppins',size:12,weight:'600'}, bodyFont:{family:'Poppins',size:11},
             titleColor:'#f5f5f5', bodyColor:'#a3a3a3', padding:12, cornerRadius:8,
-            callbacks:{ label: ctx => {
-              const v = ctx.parsed.y;
-              if (ctx.dataset.label.includes('Fatur')) return ` Faturamento: R$${v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-              return ` ${ctx.dataset.label}: ${v.toLocaleString('pt-BR')}`;
+            callbacks:{ label: c => {
+              const v = c.parsed.y;
+              if (c.dataset.label.includes('Fatur')) return ` Faturamento: R$${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+              return ` ${c.dataset.label}: ${v.toLocaleString('pt-BR')}`;
             }}
           }
         },
         scales:{
-          x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{font:{family:'Poppins',size:10},color:'#a3a3a3',maxTicksLimit:15} },
-          y:{ position:'left', grid:{color:'rgba(255,255,255,0.04)'}, ticks:{font:{family:'Poppins',size:10},color:'#9AEE00', callback: v=>'R$'+(v>=1000?(v/1000).toFixed(0)+'k':v.toLocaleString('pt-BR'))} },
-          y2:{ position:'right', grid:{display:false}, ticks:{font:{family:'Poppins',size:10},color:'#a3a3a3', callback: v=>v>=1000?(v/1000).toFixed(0)+'k':v} }
+          x:{
+            grid:{color:'rgba(255,255,255,0.04)'},
+            ticks:{font:{family:'Poppins',size:10},color:'#a3a3a3',maxTicksLimit:15}
+          },
+          // Eixo esquerdo: Faturamento
+          y:{
+            position:'left',
+            grid:{color:'rgba(255,255,255,0.04)'},
+            ticks:{font:{family:'Poppins',size:10},color:'#9AEE00',
+              callback: v=>'R$'+(v>=1000?(v/1000).toFixed(0)+'k':v.toLocaleString('pt-BR'))}
+          },
+          // Eixo direito topo: Impressões
+          y2:{
+            position:'right',
+            grid:{display:false},
+            ticks:{font:{family:'Poppins',size:10},color:'#00A8FF',
+              callback: v=>v>=1000?(v/1000).toFixed(0)+'k':v}
+          },
+          // Eixo direito base: Cliques (escala independente — resolve o "reto")
+          y3:{
+            position:'right',
+            grid:{display:false},
+            display:false, // oculta labels do eixo mas mantém escala propria
+            ticks:{font:{family:'Poppins',size:10},color:'#ff7420',
+              callback: v=>v>=1000?(v/1000).toFixed(0)+'k':v}
+          }
         }
       }
     });
