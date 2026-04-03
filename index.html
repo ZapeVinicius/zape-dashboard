@@ -483,9 +483,26 @@ function hideProgress() {
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────────────────────
+// Busca todos os dados paginando (Supabase REST tem limite de 1000 por request)
+async function fetchAllDados(lojaId) {
+  const PAGE = 1000;
+  let all = [];
+  let from = 0;
+  while (true) {
+    const chunk = await api(
+      `dados_diarios?loja_id=eq.${lojaId}&select=*&order=data.asc&limit=${PAGE}&offset=${from}`
+    );
+    if (!chunk || chunk.length === 0) break;
+    all = all.concat(chunk);
+    if (chunk.length < PAGE) break;
+    from += PAGE;
+  }
+  return all;
+}
+
 async function loadDashboard() {
   try {
-    allDados = await api(`dados_diarios?loja_id=eq.${currentLoja.id}&select=*&order=data.asc`);
+    allDados = await fetchAllDados(currentLoja.id);
     if (!allDados || allDados.length === 0) { showEmpty(); return; }
 
     const datas = [...new Set(allDados.map(d => d.data))].sort();
