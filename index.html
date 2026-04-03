@@ -597,7 +597,7 @@ function renderCharts() {
     card.innerHTML = `
       <div class="chart-card-header">
         <div>
-          <div class="chart-card-title">${prod.nome.substring(0,70)}</div>
+          <div class="chart-card-title">${prod.nome.substring(1,00)}</div>
           <div class="chart-card-id">ID: ${pid}</div>
         </div>
         <div class="chart-badges">
@@ -607,17 +607,17 @@ function renderCharts() {
       <div class="chart-card-body">
         <div class="chart-metrics">
           <div class="metric-mini">
-            <div class="metric-mini-lbl">Faturamento Total</div>
+            <div class="metric-mini-lbl">Faturamento</div>
             <div class="metric-mini-val">R$${totalFat.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
             <div class="metric-mini-var" style="color:var(--text3)">no período</div>
           </div>
           <div class="metric-mini">
-            <div class="metric-mini-lbl">Impressões Total</div>
+            <div class="metric-mini-lbl">Impressões</div>
             <div class="metric-mini-val">${totalImp.toLocaleString('pt-BR')}</div>
             <div class="metric-mini-var" style="color:var(--text3)">no período</div>
           </div>
           <div class="metric-mini">
-            <div class="metric-mini-lbl">Cliques Total</div>
+            <div class="metric-mini-lbl">Cliques</div>
             <div class="metric-mini-val">${totalClk.toLocaleString('pt-BR')}</div>
             <div class="metric-mini-var" style="color:var(--text3)">no período</div>
           </div>
