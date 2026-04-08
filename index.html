@@ -5,160 +5,243 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zape Insight — Dashboard</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='369' height='219' viewBox='0 0 369 219' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M71.7466 0L64.0771 9.27613L39.7905 38.5551L32.121 47.8312H62.7576L143.617 48.3275L0 218.123H68.5716L68.7777 217.894L107.001 173.918L258.164 0H71.7466Z' fill='%239AEE00'/%3E%3Cpath d='M237.258 9.27612L94.1777 173.88L63.7885 208.846H20.5344L39.2132 186.782L50.0989 173.88L164.151 39.0513H52.7379V38.5551H39.7905L64.0771 9.27612H237.258Z' fill='%239AEE00'/%3E%3Cpath d='M101.6 217.894L250.206 51.6105H314.324L167.285 218.657L101.6 217.894Z' fill='%239AEE00'/%3E%3Cpath d='M162.419 209.343L121.845 208.847L246.247 60.3522H287.357L162.419 209.343Z' fill='%239AEE00'/%3E%3Cpath d='M202.828 217.894L304.799 96.6932H369L267.895 218.657L202.828 217.894Z' fill='%239AEE00'/%3E%3Cpath d='M262.782 209.343L222.167 208.847L321.21 102.915H360.918L262.782 209.343Z' fill='%239AEE00'/%3E%3Cpath d='M167.285 173.88H39.2132V217.855H167.285V173.88Z' fill='%239AEE00'/%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg:      #0a0a0a;
-    --bg2:     #111111;
-    --bg3:     #1a1a1a;
-    --bg4:     #222222;
-    --border:  #1f1f1f;
-    --border2: #2a2a2a;
-    --border3: #333333;
-    --text:    #f5f5f5;
-    --text2:   #a3a3a3;
-    --text3:   #525252;
-    --green:   #9AEE00;
-    --green-d: #7ac800;
-    --green-dim: rgba(154,238,0,0.08);
-    --radius:  14px;
-  }
-  body { font-family:'Poppins',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; line-height:1.6; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:    #0a0a0a;
+  --bg2:   #0f0f0f;
+  --bg3:   #141414;
+  --line:  #1e1e1e;
+  --line2: #2a2a2a;
+  --green: #9AEE00;
+  --green-d: #7ac800;
+  --text:  #e8e8e8;
+  --text2: #666;
+  --text3: #333;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Poppins', sans-serif;
+}
+body { font-family: var(--mono); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 13px; }
 
-  nav { position:sticky; top:0; z-index:100; background:rgba(10,10,10,0.85); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 32px; height:56px; }
-  .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; cursor:pointer; }
-  .nav-logo svg { width:32px; height:19px; }
-  .nav-logo-text { font-size:15px; font-weight:700; color:var(--text); letter-spacing:-0.02em; }
-  .nav-logo-text span { color:var(--green); }
-  .nav-right { display:flex; align-items:center; gap:8px; }
-  .nav-btn { padding:7px 16px; border-radius:8px; font-family:'Poppins',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s; border:1px solid var(--border3); background:var(--bg3); color:var(--text2); }
-  .nav-btn:hover { background:var(--bg4); color:var(--text); }
-  .nav-btn-primary { background:var(--green); color:#0a0a0a; border-color:var(--green); }
-  .nav-btn-primary:hover { background:var(--green-d); border-color:var(--green-d); }
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: var(--bg); } ::-webkit-scrollbar-thumb { background: var(--line2); }
 
-  .page { display:none; }
-  .page.active { display:block; }
+.page { display: none; } .page.active { display: block; }
 
-  /* LANDING */
-  .hero { max-width:860px; margin:0 auto; padding:100px 32px 80px; text-align:center; position:relative; z-index:1; }
-  .hero-tag { display:inline-flex; align-items:center; gap:6px; background:var(--green-dim); border:1px solid rgba(154,238,0,0.2); border-radius:100px; padding:4px 14px 4px 10px; font-size:12px; font-weight:500; color:var(--green); margin-bottom:32px; }
-  .hero-tag-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
-  h1 { font-size:clamp(40px,6vw,72px); font-weight:800; letter-spacing:-0.03em; line-height:1.05; margin-bottom:20px; }
-  h1 em { font-style:normal; color:var(--green); }
-  .hero-sub { font-size:17px; color:var(--text2); max-width:520px; margin:0 auto 44px; line-height:1.75; }
-  .hero-actions { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; }
-  .btn-main { display:inline-flex; align-items:center; gap:8px; background:var(--green); color:#0a0a0a; padding:12px 26px; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; font-weight:700; border:none; cursor:pointer; transition:all 0.15s; }
-  .btn-main:hover { background:var(--green-d); transform:translateY(-1px); }
-  .btn-sec { display:inline-flex; align-items:center; gap:8px; background:transparent; color:var(--text2); padding:12px 26px; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; font-weight:600; border:1px solid var(--border3); cursor:pointer; transition:all 0.15s; }
-  .btn-sec:hover { background:var(--bg3); color:var(--text); }
-  .features { border-top:1px solid var(--border); max-width:960px; margin:0 auto; padding:80px 32px; display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-  @media(max-width:640px){ .features { grid-template-columns:1fr; } }
-  .feat-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; transition:border-color 0.2s; }
-  .feat-card:hover { border-color:var(--border3); }
-  .feat-icon { width:40px; height:40px; border-radius:10px; background:var(--bg3); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; font-size:18px; margin-bottom:16px; }
-  .feat-title { font-size:15px; font-weight:700; margin-bottom:8px; letter-spacing:-0.02em; }
-  .feat-desc { font-size:13px; color:var(--text2); line-height:1.65; }
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; height: 48px;
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.nav-logo svg { width: 28px; height: 17px; }
+.nav-logo-text { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: 0.05em; }
+.nav-logo-text span { color: var(--green); }
+.nav-tag { font-size: 10px; color: var(--text2); letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--line2); padding: 2px 8px; }
+.nav-right { display: flex; gap: 8px; }
+.nav-btn {
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  padding: 6px 14px; border: 1px solid var(--line2);
+  background: transparent; color: var(--text2); cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.08em; transition: all 0.1s;
+}
+.nav-btn:hover { border-color: var(--green); color: var(--green); }
+.nav-btn-primary { border-color: var(--green); color: var(--green); }
+.nav-btn-primary:hover { background: var(--green); color: #000; }
 
-  /* STORE */
-  .store-page { max-width:480px; margin:0 auto; padding:72px 24px; }
-  .store-page h2 { font-size:28px; font-weight:800; letter-spacing:-0.03em; margin-bottom:8px; }
-  .store-page p { font-size:14px; color:var(--text2); margin-bottom:32px; }
-  .input-group { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
-  .input-label { font-size:12px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.06em; }
-  .input-field { width:100%; padding:11px 14px; border:1px solid var(--border2); border-radius:9px; font-family:'Poppins',sans-serif; font-size:14px; color:var(--text); background:var(--bg2); outline:none; transition:border 0.15s; }
-  .input-field:focus { border-color:var(--green); }
-  .input-field::placeholder { color:var(--text3); }
-  .btn-full { width:100%; padding:12px; background:var(--green); color:#0a0a0a; border:none; border-radius:9px; font-family:'Poppins',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:background 0.15s; }
-  .btn-full:hover { background:var(--green-d); }
-  .btn-full:disabled { opacity:0.3; cursor:not-allowed; }
-  .divider { display:flex; align-items:center; gap:12px; margin:20px 0; color:var(--text3); font-size:12px; }
-  .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border2); }
-  .store-list { display:flex; flex-direction:column; gap:8px; }
-  .store-item { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border:1px solid var(--border); border-radius:9px; cursor:pointer; transition:all 0.15s; background:var(--bg2); }
-  .store-item:hover { border-color:var(--border3); background:var(--bg3); }
-  .store-item-name { font-weight:600; font-size:14px; }
-  .store-item-sub { font-size:12px; color:var(--text3); }
-  .msg-error { font-size:13px; color:#f87171; margin-top:8px; display:none; }
-  .msg-error.show { display:block; }
+/* ── LANDING ── */
+.landing-wrap { max-width: 900px; margin: 0 auto; padding: 80px 24px; }
+.landing-header { margin-bottom: 64px; }
+.landing-label { font-size: 10px; color: var(--text2); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.landing-label::before { content: '//'; color: var(--green); }
+.landing-title { font-family: var(--mono); font-size: clamp(28px, 5vw, 52px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--text); }
+.landing-title .hl { color: var(--green); }
+.landing-sub { font-family: var(--sans); font-size: 15px; color: var(--text2); margin-top: 16px; line-height: 1.7; max-width: 500px; }
+.landing-actions { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
+.btn-cli {
+  font-family: var(--mono); font-size: 12px; font-weight: 700;
+  padding: 10px 20px; border: 1px solid var(--green);
+  background: transparent; color: var(--green); cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.1em; transition: all 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-cli:hover { background: var(--green); color: #000; }
+.btn-cli-ghost { border-color: var(--line2); color: var(--text2); }
+.btn-cli-ghost:hover { border-color: var(--text2); color: var(--text); background: transparent; }
+.btn-cli::before { content: '>'; opacity: 0.5; }
 
-  /* DASH */
-  .dash-header { border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; justify-content:space-between; background:var(--bg2); }
-  .dash-header-left { display:flex; align-items:center; gap:12px; }
-  .dash-breadcrumb { font-size:13px; color:var(--text3); cursor:pointer; }
-  .dash-breadcrumb:hover { color:var(--text); }
-  .dash-store-name { font-size:15px; font-weight:700; letter-spacing:-0.02em; }
-  .dash-body { max-width:1200px; margin:0 auto; padding:32px; }
+/* features grid — terminal style */
+.feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; border: 1px solid var(--line); margin-top: 64px; }
+@media(max-width:640px){ .feat-grid { grid-template-columns: 1fr; } }
+.feat-item { padding: 28px 24px; border-right: 1px solid var(--line); background: var(--bg2); }
+.feat-item:last-child { border-right: none; }
+.feat-num { font-size: 10px; color: var(--green); letter-spacing: 0.15em; margin-bottom: 12px; }
+.feat-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: 0.02em; }
+.feat-desc { font-family: var(--sans); font-size: 12px; color: var(--text2); line-height: 1.6; }
 
-  .upload-area { border:1.5px dashed var(--border2); border-radius:var(--radius); padding:28px; text-align:center; cursor:pointer; transition:all 0.2s; margin-bottom:28px; background:var(--bg2); }
-  .upload-area:hover,.upload-area.dragover { border-color:var(--green); background:rgba(154,238,0,0.04); }
-  .upload-area input { display:none; }
-  .upload-icon { font-size:26px; margin-bottom:8px; }
-  .upload-title { font-size:14px; font-weight:600; margin-bottom:3px; }
-  .upload-sub { font-size:12px; color:var(--text3); }
+/* ── STORE ── */
+.store-wrap { max-width: 520px; margin: 0 auto; padding: 60px 24px; }
+.section-label { font-size: 10px; color: var(--text2); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.section-label::before { content: '//'; color: var(--green); }
+.section-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; }
+.section-sub { font-family: var(--sans); font-size: 13px; color: var(--text2); margin-bottom: 32px; }
 
-  .progress-bar-wrap { display:none; margin-bottom:24px; }
-  .progress-bar-wrap.show { display:block; }
-  .progress-track { height:2px; background:var(--bg3); border-radius:2px; overflow:hidden; }
-  .progress-fill { height:100%; background:var(--green); width:0%; transition:width 0.3s; }
-  .progress-lbl { font-size:12px; color:var(--text3); margin-top:6px; text-align:center; }
+.field-label { font-size: 10px; color: var(--text2); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+.cli-input {
+  width: 100%; padding: 10px 14px;
+  background: var(--bg2); border: 1px solid var(--line2);
+  font-family: var(--mono); font-size: 13px; color: var(--text);
+  outline: none; transition: border 0.1s; margin-bottom: 12px;
+}
+.cli-input:focus { border-color: var(--green); }
+.cli-input::placeholder { color: var(--text3); }
+.btn-cli-full {
+  width: 100%; padding: 11px; border: 1px solid var(--green);
+  background: transparent; color: var(--green);
+  font-family: var(--mono); font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.15s;
+}
+.btn-cli-full:hover { background: var(--green); color: #000; }
+.btn-cli-full:disabled { opacity: 0.25; cursor: not-allowed; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: var(--text3); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 
-  .filter-bar { display:flex; align-items:center; gap:12px; margin-bottom:24px; flex-wrap:wrap; background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px 16px; }
-  .filter-bar label { font-size:12px; font-weight:600; color:var(--text2); }
-  .filter-bar input[type=date] { padding:6px 10px; border:1px solid var(--border2); border-radius:7px; font-family:'Poppins',sans-serif; font-size:12px; outline:none; background:var(--bg3); color:var(--text); cursor:pointer; color-scheme:dark; }
-  .filter-bar input[type=date]:focus { border-color:var(--green); }
-  .filter-btn { padding:6px 14px; border-radius:7px; font-family:'Poppins',sans-serif; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--border2); background:var(--bg3); color:var(--text2); transition:all 0.15s; }
-  .filter-btn:hover { background:var(--green); color:#0a0a0a; border-color:var(--green); }
-  .search-input { flex:1; min-width:160px; padding:7px 12px; border:1px solid var(--border2); border-radius:7px; font-family:'Poppins',sans-serif; font-size:13px; outline:none; transition:border 0.15s; background:var(--bg3); color:var(--text); }
-  .search-input::placeholder { color:var(--text3); }
-  .search-input:focus { border-color:var(--green); }
+.store-list { display: flex; flex-direction: column; gap: 1px; border: 1px solid var(--line); }
+.store-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg2); cursor: pointer; transition: background 0.1s; border-left: 2px solid transparent; }
+.store-item:hover { background: var(--bg3); border-left-color: var(--green); }
+.store-item-name { font-size: 12px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+.store-item-sub { font-family: var(--sans); font-size: 11px; color: var(--text2); margin-top: 2px; }
+.msg-error { font-size: 11px; color: #f87171; margin-top: 8px; display: none; letter-spacing: 0.05em; }
+.msg-error.show { display: block; }
+.msg-error::before { content: '! '; }
 
-  .charts-grid { display:flex; flex-direction:column; gap:16px; }
-  .chart-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:border-color 0.2s; }
-  .chart-card:hover { border-color:var(--border2); }
-  .chart-card-header { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--bg3); }
-  .chart-card-title { font-size:13px; font-weight:700; letter-spacing:-0.01em; }
-  .chart-card-id { font-size:11px; color:var(--text3); margin-top:1px; }
-  .chart-badges { display:flex; gap:6px; align-items:center; }
-  .badge { font-size:11px; font-weight:700; padding:3px 9px; border-radius:100px; }
-  .badge-green { background:rgba(34,197,94,0.15); color:#4ade80; }
-  .badge-red   { background:rgba(239,68,68,0.15);  color:#f87171; }
-  .chart-card-body { padding:16px 20px; }
-  .chart-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
-  .metric-mini { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:10px 12px; }
-  .metric-mini-lbl { font-size:10px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:3px; }
-  .metric-mini-val { font-size:17px; font-weight:800; letter-spacing:-0.02em; }
-  .metric-mini-var { font-size:11px; font-weight:600; margin-top:2px; }
-  .var-pos { color:#4ade80; } .var-neg { color:#f87171; }
-  .chart-canvas-wrap { position:relative; height:200px; }
+/* ── DASH HEADER ── */
+.dash-header {
+  border-bottom: 1px solid var(--line);
+  padding: 0 24px; height: 44px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg2);
+}
+.dash-header-left { display: flex; align-items: center; gap: 0; font-size: 11px; }
+.dash-breadcrumb { color: var(--text2); cursor: pointer; padding: 0 10px 0 0; }
+.dash-breadcrumb:hover { color: var(--green); }
+.dash-sep { color: var(--text3); margin: 0 8px; }
+.dash-store-name { font-weight: 700; font-size: 12px; color: var(--text); letter-spacing: 0.05em; }
+.dash-body { max-width: 1280px; margin: 0 auto; padding: 24px; }
 
-  .empty-state { text-align:center; padding:80px 24px; color:var(--text3); }
-  .empty-icon { font-size:40px; margin-bottom:16px; }
-  .empty-title { font-size:16px; font-weight:700; color:var(--text2); margin-bottom:8px; }
+/* ── UPLOAD ── */
+.upload-zone {
+  border: 1px dashed var(--line2); padding: 24px;
+  text-align: center; cursor: pointer;
+  transition: all 0.15s; margin-bottom: 24px;
+  background: var(--bg2); position: relative;
+}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--green); background: rgba(154,238,0,0.03); }
+.upload-zone input { display: none; }
+.upload-zone-label { font-size: 10px; color: var(--text2); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+.upload-zone-cmd { font-size: 13px; color: var(--green); font-weight: 700; }
+.upload-zone-hint { font-family: var(--sans); font-size: 11px; color: var(--text3); margin-top: 4px; }
 
-  .toast { position:fixed; bottom:24px; right:24px; z-index:999; background:var(--bg3); color:var(--text); border:1px solid var(--border2); padding:12px 20px; border-radius:10px; font-size:13px; font-weight:500; transform:translateY(80px); opacity:0; transition:all 0.3s; pointer-events:none; }
-  .toast.show { transform:translateY(0); opacity:1; }
-  .toast.error { background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.3); color:#f87171; }
-  .toast.success { background:rgba(154,238,0,0.1); border-color:rgba(154,238,0,0.3); color:var(--green); }
+/* ── PROGRESS ── */
+.progress-bar-wrap { display: none; margin-bottom: 24px; }
+.progress-bar-wrap.show { display: block; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.progress-header-lbl { font-size: 10px; color: var(--text2); letter-spacing: 0.12em; text-transform: uppercase; }
+.progress-header-pct { font-size: 10px; color: var(--green); }
+.progress-track { height: 2px; background: var(--line); position: relative; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--green); width: 0%; transition: width 0.3s; }
+.progress-lbl { font-family: var(--sans); font-size: 11px; color: var(--text2); margin-top: 6px; }
 
-  footer { border-top:1px solid var(--border); padding:20px 32px; display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--text3); }
-  footer a { color:var(--text3); text-decoration:none; }
-  footer a:hover { color:var(--text); }
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 24px; flex-wrap: wrap;
+  border: 1px solid var(--line); padding: 10px 14px;
+  background: var(--bg2);
+}
+.filter-lbl { font-size: 10px; color: var(--text2); letter-spacing: 0.1em; text-transform: uppercase; }
+.filter-bar input[type=date] {
+  padding: 5px 10px; border: 1px solid var(--line2);
+  background: var(--bg3); font-family: var(--mono); font-size: 11px; color: var(--text);
+  outline: none; cursor: pointer; color-scheme: dark;
+}
+.filter-bar input[type=date]:focus { border-color: var(--green); }
+.filter-quick {
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  padding: 5px 10px; border: 1px solid var(--line2);
+  background: transparent; color: var(--text2); cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.08em; transition: all 0.1s;
+}
+.filter-quick:hover { border-color: var(--green); color: var(--green); }
+.filter-search {
+  flex: 1; min-width: 140px; padding: 5px 10px;
+  border: 1px solid var(--line2); background: var(--bg3);
+  font-family: var(--mono); font-size: 11px; color: var(--text); outline: none;
+}
+.filter-search::placeholder { color: var(--text3); }
+.filter-search:focus { border-color: var(--green); }
 
-  .loading-spinner { display:inline-block; width:13px; height:13px; border:2px solid rgba(10,10,10,0.3); border-top-color:#0a0a0a; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:5px; }
-  @keyframes spin { to{transform:rotate(360deg);} }
-  ::-webkit-scrollbar { width:6px; height:6px; }
-  ::-webkit-scrollbar-track { background:var(--bg); }
-  ::-webkit-scrollbar-thumb { background:var(--border3); border-radius:3px; }
-  ::-webkit-scrollbar-thumb:hover { background:var(--text3); }
+/* ── CHARTS ── */
+.charts-grid { display: flex; flex-direction: column; gap: 1px; }
+.chart-card { background: var(--bg2); border: 1px solid var(--line); }
+.chart-card-header {
+  padding: 12px 16px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: flex-start; justify-content: space-between;
+  background: var(--bg3);
+}
+.chart-card-title { font-size: 12px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+.chart-card-id { font-size: 10px; color: var(--text2); margin-top: 2px; letter-spacing: 0.08em; }
+.chart-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  letter-spacing: 0.08em; border: 1px solid;
+}
+.badge-green { border-color: rgba(154,238,0,0.4); color: var(--green); background: rgba(154,238,0,0.06); }
+.badge-red { border-color: rgba(248,113,113,0.4); color: #f87171; background: rgba(248,113,113,0.06); }
+
+.chart-card-body { padding: 14px 16px; }
+.chart-metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; margin-bottom: 16px; border: 1px solid var(--line); }
+.metric-cell { padding: 12px 14px; background: var(--bg3); border-right: 1px solid var(--line); }
+.metric-cell:last-child { border-right: none; }
+.metric-cell-lbl { font-size: 9px; color: var(--text2); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+.metric-cell-val { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.metric-cell-sub { font-family: var(--sans); font-size: 10px; color: var(--text3); margin-top: 3px; }
+.chart-canvas-wrap { position: relative; height: 200px; }
+
+/* ── EMPTY ── */
+.empty-state { text-align: center; padding: 80px 24px; }
+.empty-cmd { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+.empty-cmd::before { content: '$ '; color: var(--green); }
+.empty-title { font-size: 14px; font-weight: 700; color: var(--text2); margin-bottom: 4px; }
+.empty-sub { font-family: var(--sans); font-size: 12px; color: var(--text3); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 20px; right: 20px; z-index: 999;
+  background: var(--bg3); color: var(--text); border: 1px solid var(--line2);
+  padding: 10px 16px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.05em; transform: translateY(60px); opacity: 0;
+  transition: all 0.25s; pointer-events: none;
+}
+.toast::before { content: '> '; color: var(--green); }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-color: rgba(248,113,113,0.4); color: #f87171; }
+.toast.error::before { color: #f87171; }
+.toast.success { border-color: rgba(154,238,0,0.3); color: var(--green); }
+
+footer { border-top: 1px solid var(--line); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: var(--text3); letter-spacing: 0.08em; }
+footer a { color: var(--text3); text-decoration: none; } footer a:hover { color: var(--green); }
+
+.spin { display: inline-block; width: 12px; height: 12px; border: 1px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 4px; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-
-<div style="position:fixed;top:0;left:0;right:0;height:400px;pointer-events:none;z-index:0;background:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(154,238,0,0.07) 0%, transparent 60%)"></div>
 
 <nav>
   <div class="nav-logo" onclick="goHome()">
@@ -172,62 +255,64 @@
       <path d="M167.285 173.88H39.2132V217.855H167.285V173.88Z" fill="#9AEE00"/>
     </svg>
     <span class="nav-logo-text">Zape<span>Insight</span></span>
+    <span class="nav-tag">v2.0</span>
   </div>
   <div class="nav-right">
-    <button class="nav-btn" onclick="showPage('store')">Acessar loja</button>
-    <button class="nav-btn nav-btn-primary" onclick="showPage('store')">Nova loja →</button>
+    <button class="nav-btn" onclick="showPage('store')">-- loja</button>
+    <button class="nav-btn nav-btn-primary" onclick="showPage('store')">+ nova</button>
   </div>
 </nav>
 
 <!-- LANDING -->
-<div id="page-landing" class="page active" style="position:relative">
-  <div class="hero">
-    <div class="hero-tag"><div class="hero-tag-dot"></div>Performance diária</div>
-    <h1>Acompanhe a evolução<br>diária dos seus <em>anúncios</em></h1>
-    <p class="hero-sub">Envie o relatório de cada dia e visualize a performance dos seus produtos ao longo do tempo — tudo em um único lugar.</p>
-    <div class="hero-actions">
-      <button class="btn-main" onclick="showPage('store')">Acessar minha loja →</button>
-      <button class="btn-sec" onclick="showPage('store')">Criar nova loja</button>
+<div id="page-landing" class="page active">
+  <div class="landing-wrap">
+    <div class="landing-header">
+      <div class="landing-label">performance diária</div>
+      <div class="landing-title">Acompanhe a evolução<br>diária dos seus <span class="hl">anúncios</span></div>
+      <div class="landing-sub">Envie o relatório de cada dia e visualize a performance dos seus produtos ao longo do tempo — tudo em um único lugar.</div>
+      <div class="landing-actions">
+        <button class="btn-cli" onclick="showPage('store')">acessar loja</button>
+        <button class="btn-cli btn-cli-ghost" onclick="showPage('store')">criar nova</button>
+      </div>
     </div>
-  </div>
-  <div class="features">
-    <div class="feat-card">
-      <div class="feat-icon">📅</div>
-      <div class="feat-title">Histórico diário</div>
-      <div class="feat-desc">Envie um relatório por dia e veja a curva de performance de cada produto no tempo.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🏪</div>
-      <div class="feat-title">Por loja</div>
-      <div class="feat-desc">Cada loja tem seu próprio espaço com histórico separado. Acesse a qualquer momento.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">⚡</div>
-      <div class="feat-title">Sem download</div>
-      <div class="feat-desc">Gráficos interativos direto no navegador. Filtre por período e busque por produto.</div>
+    <div class="feat-grid">
+      <div class="feat-item">
+        <div class="feat-num">01 // HISTÓRICO</div>
+        <div class="feat-title">Dados diários</div>
+        <div class="feat-desc">Envie um relatório por dia e veja a curva de cada produto ao longo do tempo.</div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-num">02 // LOJAS</div>
+        <div class="feat-title">Por loja</div>
+        <div class="feat-desc">Cada loja tem espaço próprio com histórico separado. Acesse a qualquer momento.</div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-num">03 // VISUAL</div>
+        <div class="feat-title">Sem download</div>
+        <div class="feat-desc">Gráficos interativos no navegador. Filtre por período e busque por produto.</div>
+      </div>
     </div>
   </div>
   <footer>
-    <span>© 2026 ZapeVinicius · Zape Insight</span>
-    <a href="#">Projeto 1 — Relatório</a>
+    <span>© 2026 ZAPEVINICIUS // ZAPE INSIGHT</span>
+    <a href="#">projeto 1 -- relatorio</a>
   </footer>
 </div>
 
 <!-- STORE SELECT -->
 <div id="page-store" class="page">
-  <div class="store-page">
-    <h2>Sua loja</h2>
-    <p>Digite o nome da sua loja para acessar ou criar um novo espaço.</p>
-    <div class="input-group">
-      <label class="input-label">Nome da loja</label>
-      <input type="text" class="input-field" id="storeInput" placeholder="Ex: Minha Loja Shopee" maxlength="60"
-        oninput="onStoreInput()" onkeydown="if(event.key==='Enter')enterStore()">
-    </div>
-    <button class="btn-full" id="btnEnter" onclick="enterStore()" disabled>Entrar →</button>
+  <div class="store-wrap">
+    <div class="section-label">acesso</div>
+    <div class="section-title">Sua loja</div>
+    <div class="section-sub">Digite o nome da loja para acessar ou criar um novo espaço.</div>
+    <div class="field-label">// nome da loja</div>
+    <input type="text" class="cli-input" id="storeInput" placeholder="Ex: Minha Loja Shopee" maxlength="60"
+      oninput="onStoreInput()" onkeydown="if(event.key==='Enter')enterStore()">
+    <button class="btn-cli-full" id="btnEnter" onclick="enterStore()" disabled>[ entrar ]</button>
     <div class="msg-error" id="storeError"></div>
-    <div class="divider">ou acesse uma loja existente</div>
+    <div class="divider">lojas existentes</div>
     <div class="store-list" id="storeList">
-      <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Carregando lojas...</div>
+      <div style="padding:16px;color:var(--text2);font-size:11px">// carregando...</div>
     </div>
   </div>
 </div>
@@ -236,45 +321,49 @@
 <div id="page-dash" class="page">
   <div class="dash-header">
     <div class="dash-header-left">
-      <span class="dash-breadcrumb" onclick="showPage('store')">← Lojas</span>
-      <span style="color:var(--border3)">/</span>
+      <span class="dash-breadcrumb" onclick="showPage('store')">lojas</span>
+      <span class="dash-sep">/</span>
       <span class="dash-store-name" id="dashStoreName">—</span>
     </div>
     <div class="nav-right">
-      <button class="nav-btn" onclick="document.getElementById('uploadInput').click()">+ Enviar planilha do dia</button>
+      <button class="nav-btn nav-btn-primary" onclick="document.getElementById('uploadInput').click()">+ upload</button>
     </div>
   </div>
 
   <div class="dash-body">
-    <div class="upload-area" id="uploadArea" onclick="document.getElementById('uploadInput').click()">
+    <div class="upload-zone" id="uploadArea" onclick="document.getElementById('uploadInput').click()">
       <input type="file" id="uploadInput" accept=".xlsx,.xls" onchange="handleUpload(this)">
-      <div class="upload-icon">📂</div>
-      <div class="upload-title">Enviar planilha do dia</div>
-      <div class="upload-sub">O nome do arquivo deve conter a data — ex: parentskudetail.20260101_20260101.xlsx</div>
+      <div class="upload-zone-label">// upload</div>
+      <div class="upload-zone-cmd">$ drag &amp; drop planilha do dia</div>
+      <div class="upload-zone-hint">parentskudetail.YYYYMMDD_YYYYMMDD.xlsx</div>
     </div>
 
     <div class="progress-bar-wrap" id="progressWrap">
+      <div class="progress-header">
+        <span class="progress-header-lbl">// processando</span>
+        <span class="progress-header-pct" id="progressLbl"></span>
+      </div>
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      <div class="progress-lbl" id="progressLbl">Processando...</div>
     </div>
 
     <div class="filter-bar" id="filterBar" style="display:none">
-      <label>De:</label>
+      <span class="filter-lbl">de:</span>
       <input type="date" id="dateFrom" onchange="renderCharts()">
-      <label>Até:</label>
+      <span class="filter-lbl">até:</span>
       <input type="date" id="dateTo" onchange="renderCharts()">
-      <button class="filter-btn" onclick="setQuickRange(7)">7 dias</button>
-      <button class="filter-btn" onclick="setQuickRange(15)">15 dias</button>
-      <button class="filter-btn" onclick="setQuickRange(30)">30 dias</button>
-      <button class="filter-btn" onclick="setQuickRange(0)">Tudo</button>
-      <input type="text" class="search-input" id="searchInput" placeholder="Buscar produto..." oninput="renderCharts()">
+      <button class="filter-quick" onclick="setQuickRange(7)">7d</button>
+      <button class="filter-quick" onclick="setQuickRange(15)">15d</button>
+      <button class="filter-quick" onclick="setQuickRange(30)">30d</button>
+      <button class="filter-quick" onclick="setQuickRange(0)">all</button>
+      <input type="text" class="filter-search" id="searchInput" placeholder="// buscar produto..." oninput="renderCharts()">
     </div>
 
     <div class="charts-grid" id="chartsGrid"></div>
+
     <div class="empty-state" id="emptyState">
-      <div class="empty-icon">📊</div>
+      <div class="empty-cmd">upload planilha</div>
       <div class="empty-title">Nenhum dado ainda</div>
-      <div style="font-size:13px;color:var(--text3)">Envie a primeira planilha do dia para ver os gráficos de performance.</div>
+      <div class="empty-sub">Envie a primeira planilha do dia para ver os gráficos.</div>
     </div>
   </div>
 </div>
@@ -289,8 +378,6 @@ let currentLoja = null;
 let allDados = [];
 let chartInstances = {};
 
-// ── API ───────────────────────────────────────────────────────────────────────
-// FIX: trata body vazio (204 ou resposta sem conteudo) sem dar erro de JSON.parse
 async function api(path, opts = {}) {
   const { prefer, headers: extraHeaders, ...fetchOpts } = opts;
   const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
@@ -307,13 +394,11 @@ async function api(path, opts = {}) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || err.hint || `Erro ${res.status}`);
   }
-  // Retorna null para respostas sem body (204 No Content ou body vazio)
   const text = await res.text();
   if (!text || text.trim() === '') return null;
   try { return JSON.parse(text); } catch { return null; }
 }
 
-// ── PAGES ────────────────────────────────────────────────────────────────────
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
@@ -328,7 +413,6 @@ function toast(msg, type = '') {
   setTimeout(() => t.className = 'toast', 3500);
 }
 
-// ── STORE ────────────────────────────────────────────────────────────────────
 function onStoreInput() {
   document.getElementById('btnEnter').disabled = document.getElementById('storeInput').value.trim().length < 2;
   document.getElementById('storeError').classList.remove('show');
@@ -338,30 +422,30 @@ function slugify(s) {
 }
 async function loadStoreList() {
   const list = document.getElementById('storeList');
-  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Carregando...</div>';
+  list.innerHTML = '<div style="padding:16px;color:var(--text2);font-size:11px">// carregando...</div>';
   try {
     const lojas = await api('lojas?select=*&order=created_at.desc&limit=20');
     if (!lojas || lojas.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Nenhuma loja cadastrada ainda.</div>';
+      list.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:11px">// nenhuma loja cadastrada</div>';
       return;
     }
     list.innerHTML = lojas.map(l => `
       <div class="store-item" onclick='openLoja(${JSON.stringify(l)})'>
         <div>
           <div class="store-item-name">${l.nome}</div>
-          <div class="store-item-sub">Criada em ${new Date(l.created_at).toLocaleDateString('pt-BR')}</div>
+          <div class="store-item-sub">// ${new Date(l.created_at).toLocaleDateString('pt-BR')}</div>
         </div>
-        <span style="color:var(--text3);font-size:16px">›</span>
+        <span style="color:var(--text3);font-size:14px">›</span>
       </div>`).join('');
   } catch(e) {
-    list.innerHTML = `<div style="color:#f87171;font-size:13px;padding:12px">${e.message}</div>`;
+    list.innerHTML = `<div style="padding:12px;color:#f87171;font-size:11px">! ${e.message}</div>`;
   }
 }
 async function enterStore() {
   const nome = document.getElementById('storeInput').value.trim();
   if (nome.length < 2) return;
   const btn = document.getElementById('btnEnter');
-  btn.innerHTML = '<span class="loading-spinner"></span>Entrando...';
+  btn.innerHTML = '<span class="spin"></span>conectando...';
   btn.disabled = true;
   try {
     const slug = slugify(nome);
@@ -372,7 +456,7 @@ async function enterStore() {
     } else {
       const created = await api('lojas', { method:'POST', body: JSON.stringify({nome, slug}) });
       loja = Array.isArray(created) ? created[0] : created;
-      toast('Loja criada com sucesso!', 'success');
+      toast('loja criada', 'success');
     }
     openLoja(loja);
   } catch(e) {
@@ -380,7 +464,7 @@ async function enterStore() {
     err.textContent = e.message;
     err.classList.add('show');
   } finally {
-    btn.innerHTML = 'Entrar →';
+    btn.innerHTML = '[ entrar ]';
     btn.disabled = false;
   }
 }
@@ -391,7 +475,6 @@ async function openLoja(loja) {
   await loadDashboard();
 }
 
-// ── UPLOAD ───────────────────────────────────────────────────────────────────
 function parseDateFromFilename(filename) {
   const m = filename.match(/\.(\d{4})(\d{2})(\d{2})_/);
   if (m) return `${m[1]}-${m[2]}-${m[3]}`;
@@ -409,25 +492,17 @@ async function handleUpload(input) {
   const file = input.files[0];
   if (!file) return;
   input.value = '';
-
   const data = parseDateFromFilename(file.name);
-  if (!data) {
-    toast('Não foi possível detectar a data. Formato: parentskudetail.YYYYMMDD_YYYYMMDD.xlsx', 'error');
-    return;
-  }
-
+  if (!data) { toast('data nao detectada no nome do arquivo', 'error'); return; }
   const dataFmt = new Date(data + 'T12:00:00').toLocaleDateString('pt-BR');
-  setProgress(10, `Lendo planilha de ${dataFmt}...`);
-
+  setProgress(10, `lendo ${dataFmt}...`);
   try {
     const ab = await file.arrayBuffer();
     const wb = XLSX.read(ab, { type:'array' });
     const sn = wb.SheetNames.find(n => n.includes('Melhor Desempenho'));
-    if (!sn) throw new Error('Aba "Produtos com Melhor Desempenho" não encontrada.');
+    if (!sn) throw new Error('aba nao encontrada');
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], { defval:'' });
-
-    setProgress(40, 'Processando produtos...');
-
+    setProgress(40, 'processando...');
     const C = {
       id:'ID do Item', nome:'Produto',
       vendas:'Vendas (Pedido pago) (BRL)',
@@ -436,12 +511,10 @@ async function handleUpload(input) {
       taxa:'Taxa de conversão (Pedido pago)',
       unidades:'Unidades (Pedido pago)',
     };
-
     const produtos = rows
       .filter(r => String(r[C.cliques]).trim() !== '-' && String(r[C.cliques]).trim() !== '')
       .map(r => ({
-        loja_id: currentLoja.id,
-        data,
+        loja_id: currentLoja.id, data,
         produto_id: String(r[C.id]),
         produto_nome: String(r[C.nome]),
         faturamento: parseNum(r[C.vendas]),
@@ -450,10 +523,7 @@ async function handleUpload(input) {
         taxa_conversao: parseNum(r[C.taxa]),
         unidades: Math.round(parseNum(r[C.unidades])),
       }));
-
-    setProgress(70, `Salvando ${produtos.length} produtos para ${dataFmt}...`);
-
-    // FIX: on_conflict na URL + prefer correto = upsert sem erro de duplicate key
+    setProgress(70, `salvando ${produtos.length} produtos...`);
     for (let i = 0; i < produtos.length; i += 50) {
       await api('dados_diarios?on_conflict=loja_id,data,produto_id', {
         method: 'POST',
@@ -461,12 +531,10 @@ async function handleUpload(input) {
         prefer: 'resolution=merge-duplicates,return=minimal',
       });
     }
-
-    setProgress(100, 'Concluído!');
-    toast(`${dataFmt} salvo! (${produtos.length} produtos)`, 'success');
-    setTimeout(() => hideProgress(), 600);
+    setProgress(100, `${dataFmt} -- ${produtos.length} produtos`);
+    toast(`${dataFmt} salvo (${produtos.length})`, 'success');
+    setTimeout(() => hideProgress(), 800);
     await loadDashboard();
-
   } catch(e) {
     hideProgress();
     toast(e.message, 'error');
@@ -482,16 +550,11 @@ function hideProgress() {
   document.getElementById('progressFill').style.width = '0%';
 }
 
-// ── DASHBOARD ────────────────────────────────────────────────────────────────
-// Busca todos os dados paginando (Supabase REST tem limite de 1000 por request)
 async function fetchAllDados(lojaId) {
   const PAGE = 1000;
-  let all = [];
-  let from = 0;
+  let all = [], from = 0;
   while (true) {
-    const chunk = await api(
-      `dados_diarios?loja_id=eq.${lojaId}&select=*&order=data.asc&limit=${PAGE}&offset=${from}`
-    );
+    const chunk = await api(`dados_diarios?loja_id=eq.${lojaId}&select=*&order=data.asc&limit=${PAGE}&offset=${from}`);
     if (!chunk || chunk.length === 0) break;
     all = all.concat(chunk);
     if (chunk.length < PAGE) break;
@@ -499,12 +562,10 @@ async function fetchAllDados(lojaId) {
   }
   return all;
 }
-
 async function loadDashboard() {
   try {
     allDados = await fetchAllDados(currentLoja.id);
     if (!allDados || allDados.length === 0) { showEmpty(); return; }
-
     const datas = [...new Set(allDados.map(d => d.data))].sort();
     const lastDate = datas[datas.length - 1];
     const firstDate = datas[0];
@@ -513,11 +574,9 @@ async function loadDashboard() {
     const from30 = d30.toISOString().split('T')[0];
     document.getElementById('dateFrom').value = from30 < firstDate ? firstDate : from30;
     document.getElementById('dateTo').value = lastDate;
-
-    renderCharts();
-    showDash();
+    renderCharts(); showDash();
   } catch(e) {
-    toast('Erro ao carregar dados: ' + e.message, 'error');
+    toast('erro: ' + e.message, 'error');
   }
 }
 function showEmpty() {
@@ -532,13 +591,8 @@ function showDash() {
 function setQuickRange(days) {
   const datas = [...new Set(allDados.map(d => d.data))].sort();
   const last = datas[datas.length - 1];
-  if (days === 0) {
-    document.getElementById('dateFrom').value = datas[0];
-  } else {
-    const d = new Date(last);
-    d.setDate(d.getDate() - (days - 1));
-    document.getElementById('dateFrom').value = d.toISOString().split('T')[0];
-  }
+  if (days === 0) { document.getElementById('dateFrom').value = datas[0]; }
+  else { const d = new Date(last); d.setDate(d.getDate()-(days-1)); document.getElementById('dateFrom').value = d.toISOString().split('T')[0]; }
   document.getElementById('dateTo').value = last;
   renderCharts();
 }
@@ -547,165 +601,108 @@ function getFilteredData() {
   const to   = document.getElementById('dateTo').value;
   return allDados.filter(d => d.data >= from && d.data <= to);
 }
-
 function renderCharts() {
   const filtered = getFilteredData();
   const search = document.getElementById('searchInput').value.toLowerCase();
   const datas = [...new Set(filtered.map(d => d.data))].sort();
   const labels = datas.map(d => { const [,m,day] = d.split('-'); return `${day}/${m}`; });
-
   const prodMap = {};
   filtered.forEach(d => {
     if (!prodMap[d.produto_id]) prodMap[d.produto_id] = { nome: d.produto_nome, por_data: {} };
     prodMap[d.produto_id].por_data[d.data] = d;
   });
-
   const grid = document.getElementById('chartsGrid');
   Object.values(chartInstances).forEach(c => c.destroy());
-  chartInstances = {};
-  grid.innerHTML = '';
-
+  chartInstances = {}; grid.innerHTML = '';
   const produtos = Object.entries(prodMap)
     .filter(([id, p]) => !search || p.nome.toLowerCase().includes(search) || id.includes(search))
     .sort(([,a],[,b]) => {
       const lastD = datas[datas.length-1];
       return parseFloat(b.por_data[lastD]?.faturamento||0) - parseFloat(a.por_data[lastD]?.faturamento||0);
     });
-
   if (produtos.length === 0) {
-    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px">Nenhum produto encontrado.</div>';
+    grid.innerHTML = '<div style="padding:32px;color:var(--text3);font-size:11px">// nenhum produto encontrado</div>';
     return;
   }
-
   produtos.forEach(([pid, prod]) => {
     const fatVals = datas.map(d => parseFloat(prod.por_data[d]?.faturamento||0));
     const impVals = datas.map(d => parseInt(prod.por_data[d]?.impressoes||0));
     const clkVals = datas.map(d => parseInt(prod.por_data[d]?.cliques||0));
-
-    // FIX 1: totais do período filtrado
-    const totalFat = fatVals.reduce((s,v) => s+v, 0);
-    const totalImp = impVals.reduce((s,v) => s+v, 0);
-    const totalClk = clkVals.reduce((s,v) => s+v, 0);
-
-    // Badge do header: variação geral faturamento (primeiro vs último)
-    const lastFat = fatVals[fatVals.length-1] || 0;
-    const firstFat = fatVals.find(v => v > 0) || 0;
-    const varFatGeral = firstFat > 0 ? (lastFat - firstFat) / firstFat : 0;
-
+    const totalFat = fatVals.reduce((s,v)=>s+v,0);
+    const totalImp = impVals.reduce((s,v)=>s+v,0);
+    const totalClk = clkVals.reduce((s,v)=>s+v,0);
+    const lastFat = fatVals[fatVals.length-1]||0;
+    const firstFat = fatVals.find(v=>v>0)||0;
+    const varFatGeral = firstFat > 0 ? (lastFat-firstFat)/firstFat : 0;
     const card = document.createElement('div');
     card.className = 'chart-card';
     card.innerHTML = `
       <div class="chart-card-header">
         <div>
-          <div class="chart-card-title">${prod.nome.substring(0,100)}</div>
-          <div class="chart-card-id">ID: ${pid}</div>
+          <div class="chart-card-title">${prod.nome.substring(0,70)}</div>
+          <div class="chart-card-id">// ${pid}</div>
         </div>
-        <div class="chart-badges">
-          <span class="badge ${varFatGeral>=0?'badge-green':'badge-red'}">${varFatGeral>=0?'▲':'▼'} ${Math.abs(varFatGeral*100).toFixed(1)}%</span>
-        </div>
+        <span class="chart-badge ${varFatGeral>=0?'badge-green':'badge-red'}">${varFatGeral>=0?'▲':'▼'} ${Math.abs(varFatGeral*100).toFixed(1)}%</span>
       </div>
       <div class="chart-card-body">
         <div class="chart-metrics">
-          <div class="metric-mini">
-            <div class="metric-mini-lbl">Faturamento</div>
-            <div class="metric-mini-val">R$${totalFat.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
-            <div class="metric-mini-var" style="color:var(--text3)">no período</div>
+          <div class="metric-cell">
+            <div class="metric-cell-lbl">faturamento</div>
+            <div class="metric-cell-val">R$${totalFat.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
+            <div class="metric-cell-sub">total período</div>
           </div>
-          <div class="metric-mini">
-            <div class="metric-mini-lbl">Impressões</div>
-            <div class="metric-mini-val">${totalImp.toLocaleString('pt-BR')}</div>
-            <div class="metric-mini-var" style="color:var(--text3)">no período</div>
+          <div class="metric-cell">
+            <div class="metric-cell-lbl">impressões</div>
+            <div class="metric-cell-val">${totalImp.toLocaleString('pt-BR')}</div>
+            <div class="metric-cell-sub">total período</div>
           </div>
-          <div class="metric-mini">
-            <div class="metric-mini-lbl">Cliques</div>
-            <div class="metric-mini-val">${totalClk.toLocaleString('pt-BR')}</div>
-            <div class="metric-mini-var" style="color:var(--text3)">no período</div>
+          <div class="metric-cell">
+            <div class="metric-cell-lbl">cliques</div>
+            <div class="metric-cell-val">${totalClk.toLocaleString('pt-BR')}</div>
+            <div class="metric-cell-sub">total período</div>
           </div>
         </div>
         <div class="chart-canvas-wrap"><canvas id="chart-${pid.replace(/[^a-z0-9]/gi,'_')}"></canvas></div>
       </div>`;
     grid.appendChild(card);
-
-    const ctx = document.getElementById('chart-' + pid.replace(/[^a-z0-9]/gi,'_')).getContext('2d');
+    const ctx = document.getElementById('chart-'+pid.replace(/[^a-z0-9]/gi,'_')).getContext('2d');
     chartInstances[pid] = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
         datasets: [
-          {
-            label:'Faturamento (R$)', data:fatVals,
-            borderColor:'#9AEE00', backgroundColor:'rgba(154,238,0,0.06)',
-            borderWidth:2, pointBackgroundColor:'#9AEE00',
-            pointRadius:4, pointHoverRadius:6,
-            fill:true, tension:0.3, yAxisID:'y'
-          },
-          {
-            label:'Impressões', data:impVals,
-            borderColor:'#00A8FF', backgroundColor:'transparent',
-            borderWidth:1.5, pointBackgroundColor:'#00A8FF',
-            pointRadius:3, pointHoverRadius:5,
-            fill:false, tension:0.3, yAxisID:'y2'
-          },
-          {
-            // FIX 2: Cliques em eixo proprio (y3) para nao ficar "reto"
-            label:'Cliques', data:clkVals,
-            borderColor:'#ff7420', backgroundColor:'transparent',
-            borderWidth:1.5, pointBackgroundColor:'#ff7420',
-            pointRadius:3, pointHoverRadius:5,
-            fill:false, tension:0.3, yAxisID:'y3'
-          }
+          { label:'Faturamento (R$)', data:fatVals, borderColor:'#9AEE00', backgroundColor:'rgba(154,238,0,0.05)', borderWidth:2, pointBackgroundColor:'#9AEE00', pointRadius:3, pointHoverRadius:5, fill:true, tension:0.3, yAxisID:'y' },
+          { label:'Impressões', data:impVals, borderColor:'#00A8FF', backgroundColor:'transparent', borderWidth:1.5, pointBackgroundColor:'#00A8FF', pointRadius:2, pointHoverRadius:4, fill:false, tension:0.3, yAxisID:'y2' },
+          { label:'Cliques', data:clkVals, borderColor:'#ff7420', backgroundColor:'transparent', borderWidth:1.5, pointBackgroundColor:'#ff7420', pointRadius:2, pointHoverRadius:4, fill:false, tension:0.3, yAxisID:'y3' }
         ]
       },
       options: {
         responsive:true, maintainAspectRatio:false,
         interaction:{ mode:'index', intersect:false },
         plugins: {
-          legend:{ position:'bottom', labels:{ font:{family:'Poppins',size:11}, padding:14, boxWidth:18, color:'#a3a3a3' } },
+          legend:{ position:'bottom', labels:{ font:{family:'JetBrains Mono',size:10}, padding:14, boxWidth:14, color:'#666' } },
           tooltip:{
-            backgroundColor:'#111111', borderColor:'#2a2a2a', borderWidth:1,
-            titleFont:{family:'Poppins',size:12,weight:'600'}, bodyFont:{family:'Poppins',size:11},
-            titleColor:'#f5f5f5', bodyColor:'#a3a3a3', padding:12, cornerRadius:8,
+            backgroundColor:'#0f0f0f', borderColor:'#2a2a2a', borderWidth:1,
+            titleFont:{family:'JetBrains Mono',size:11,weight:'700'}, bodyFont:{family:'JetBrains Mono',size:10},
+            titleColor:'#e8e8e8', bodyColor:'#666', padding:10, cornerRadius:0,
             callbacks:{ label: c => {
               const v = c.parsed.y;
-              if (c.dataset.label.includes('Fatur')) return ` Faturamento: R$${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-              return ` ${c.dataset.label}: ${v.toLocaleString('pt-BR')}`;
+              if (c.dataset.label.includes('Fatur')) return ` fat: R$${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+              return ` ${c.dataset.label.toLowerCase()}: ${v.toLocaleString('pt-BR')}`;
             }}
           }
         },
         scales:{
-          x:{
-            grid:{color:'rgba(255,255,255,0.04)'},
-            ticks:{font:{family:'Poppins',size:10},color:'#a3a3a3',maxTicksLimit:15}
-          },
-          // Eixo esquerdo: Faturamento
-          y:{
-            position:'left',
-            grid:{color:'rgba(255,255,255,0.04)'},
-            ticks:{font:{family:'Poppins',size:10},color:'#9AEE00',
-              callback: v=>'R$'+(v>=1000?(v/1000).toFixed(0)+'k':v.toLocaleString('pt-BR'))}
-          },
-          // Eixo direito topo: Impressões
-          y2:{
-            position:'right',
-            grid:{display:false},
-            ticks:{font:{family:'Poppins',size:10},color:'#00A8FF',
-              callback: v=>v>=1000?(v/1000).toFixed(0)+'k':v}
-          },
-          // Eixo direito base: Cliques (escala independente — resolve o "reto")
-          y3:{
-            position:'right',
-            grid:{display:false},
-            display:false, // oculta labels do eixo mas mantém escala propria
-            ticks:{font:{family:'Poppins',size:10},color:'#ff7420',
-              callback: v=>v>=1000?(v/1000).toFixed(0)+'k':v}
-          }
+          x:{ grid:{color:'rgba(255,255,255,0.03)'}, ticks:{font:{family:'JetBrains Mono',size:9},color:'#444',maxTicksLimit:15} },
+          y:{ position:'left', grid:{color:'rgba(255,255,255,0.03)'}, ticks:{font:{family:'JetBrains Mono',size:9},color:'#9AEE00', callback:v=>'R$'+(v>=1000?(v/1000).toFixed(0)+'k':v)} },
+          y2:{ position:'right', grid:{display:false}, ticks:{font:{family:'JetBrains Mono',size:9},color:'#00A8FF', callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v} },
+          y3:{ position:'right', grid:{display:false}, display:false, ticks:{font:{family:'JetBrains Mono',size:9},color:'#ff7420'} }
         }
       }
     });
   });
 }
 
-// Drag & drop
 const ua = document.getElementById('uploadArea');
 ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('dragover'); });
 ua.addEventListener('dragleave', () => ua.classList.remove('dragover'));
